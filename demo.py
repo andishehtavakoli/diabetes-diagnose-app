@@ -7,7 +7,7 @@ st.header('Diabetes Diagnose Application')
 st.image('https://www.fitterfly.com/blog/wp-content/uploads/2022/08/How-to-Reduce-Sugar-Level-in-Blood-Immediately.jpg')
 
 
-df = pd.read_csv('data/diabetes_prediction_dataset.csv')
+# df = pd.read_csv('data/diabetes_prediction_dataset.csv')
 # st.dataframe(df.head())
 
 
@@ -33,7 +33,8 @@ with col3:
 with col4:
     st.write("**Smoking History**")
     smoking_history = st.selectbox('select smoking history?',
-    list(df['smoking_history'].unique())
+   #  list(df['smoking_history'].unique())
+   ['never', 'No Info', 'current', 'former', 'ever', 'not current']
 )
 
 
@@ -67,16 +68,18 @@ with col7:
 
 if st.button('Predict'):
 
-    diabetes_model = joblib.load('data/model/diabetes_model.pkl')
-    y_pred = diabetes_model.predict(pd.DataFrame([[gender, age, hyper_tension, heart_disese, smoking_history, bmi, hba1c_level, blood_glucose_level]], columns=df.columns[0:-1]))
+   diabetes_model = joblib.load('data/model/diabetes_model.pkl')
+   columns = ['gender', 'age', 'hypertension', 'heart_disease', 'smoking_history',
+      'bmi', 'HbA1c_level', 'blood_glucose_level']
+   # y_pred = diabetes_model.predict(pd.DataFrame([[gender, age, hyper_tension, heart_disese, smoking_history, bmi, hba1c_level, blood_glucose_level]], columns=df.columns[0:-1]))
+   y_pred = diabetes_model.predict(pd.DataFrame([[gender, age, hyper_tension, heart_disese, smoking_history, bmi, hba1c_level, blood_glucose_level]], columns=columns))
 
+   st.markdown('## Result')
 
-    st.markdown('## Result')
+   if y_pred[0] == 0:
 
-    if y_pred[0] == 0:
+      st.success('No Diabetes')
 
-        st.success('No Diabetes')
-
-    else:
-        st.error('Has Diabetes')
+   else:
+      st.error('Has Diabetes')
 
