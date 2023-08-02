@@ -1,85 +1,86 @@
 import streamlit as st
 import pandas as pd
-from joblib import Parallel, delayed
+import numpy as np
+from joblib import load
 import joblib
+from helper_function import load_df
+
 
 st.header('Diabetes Diagnose Application')
 st.image('https://www.fitterfly.com/blog/wp-content/uploads/2022/08/How-to-Reduce-Sugar-Level-in-Blood-Immediately.jpg')
 
-
-# df = pd.read_csv('data/diabetes_prediction_dataset.csv')
-# st.dataframe(df.head())
-
+df = load_df('/Users/andishetavakkoli/Documents/notebook/github_project/diabetes-diagnose-app/data/diabetes_prediction_dataset.csv')
 
 col1, col2, col3, col4 = st.columns(4)
-
 with col1:
-   st.write("**Gender**")
-   gender = st.selectbox(
-    'select the gender',
-    ('Female', 'Male', 'Other'))
-
+    st.write('**Gender**')
+    gender = st.selectbox('select a gender from box',
+                          ('Female', 'Male', 'Other'))
 
 with col2:
-   st.write("**Age**")
-   age = st.number_input("Insert your age")
+    st.write('**Age**')
+    age = st.number_input('select an age')
 
 
 
 with col3:
-   st.write("**BMI**")
-   bmi = st.number_input("Insert your bmi")
+    st.write('**BMI**')
+    bmi = st.number_input('select a bmi number')
+
 
 with col4:
-    st.write("**Smoking History**")
-    smoking_history = st.selectbox('select smoking history?',
-   #  list(df['smoking_history'].unique())
-   ['never', 'No Info', 'current', 'former', 'ever', 'not current']
-)
+    st.write('**Smoking History**')
+    smoking_history = st.selectbox('select a smoking history from box',
+                        (df['smoking_history'].unique()))
 
 
-col5, col6, col7= st.columns(3)
-
+col5, col6, col7 = st.columns(3)
 with col5:
-   st.write("**HbA1c_Level**")
-   hba1c_level = st.number_input("Insert your HbA1c Level")
-
+    st.write('**HbA1c_Level**')
+    hba1c_level = st.number_input('select a HbA1c Level number')
 
 with col6:
-   st.write("**Blood_Glucose_Level**")
-   blood_glucose_level = st.number_input("Insert your blood glucose")
-
-
+    st.write('**Blood_Glucose_Level**')
+    blood_glucose = st.number_input('select a blood glucose Level number')
 
 with col7:
-   st.write("**Disease**")
-   heart_disese = int(st.checkbox("Heart Disease"))
-   hyper_tension = int(st.checkbox("Hyper tension"))
+    st.write('**Diseas**')
+    heart_disease = st.checkbox('Heart Diseas')
+    if heart_disease:
+        st.write('Yes')
 
-# st.write(
-# gender,
-# age,
-# hyper_tension,
-# heart_disese,
-# smoking_history,
-# bmi,
-# hba1c_level,
-# blood_glucose_level)
-
+    hypertension = st.checkbox('Hyper Tension')
+    if hypertension:
+        st.write('Yes')
+        
 if st.button('Predict'):
+    # load preprocessore and model
+    preprocessor = joblib.load('/Users/andishetavakkoli/Documents/notebook/github_project/diabetes-diagnose-app/data/model/preprocessor.joblib')
+    loaded_model = joblib.load('/Users/andishetavakkoli/Documents/notebook/github_project/diabetes-diagnose-app/data/model/diabetes_model.joblib')
 
-   diabetes_model = joblib.load('data/model/diabetes_model.pkl')
-   columns = ['gender', 'age', 'hypertension', 'heart_disease', 'smoking_history',
-      'bmi', 'HbA1c_level', 'blood_glucose_level']
-   # y_pred = diabetes_model.predict(pd.DataFrame([[gender, age, hyper_tension, heart_disese, smoking_history, bmi, hba1c_level, blood_glucose_level]], columns=df.columns[0:-1]))
-   y_pred = diabetes_model.predict(pd.DataFrame([[gender, age, hyper_tension, heart_disese, smoking_history, bmi, hba1c_level, blood_glucose_level]], columns=columns))
+    df_sample = pd.DataFrame([[gender , age, hypertension, heart_disease, smoking_history, bmi, hba1c_level, blood_glucose]], 
+                                columns=['gender',
+                                            'age',
+                                            'hypertension',
+                                            'heart_disease',
+                                            'smoking_history',
+                                            'bmi',
+                                            'HbA1c_level',
+                                            'blood_glucose_level'
+                                            ])
 
-   st.markdown('## Result')
 
-   if y_pred[0] == 0:
+    df_sample = preprocessor.transform(df_sample)
+    result = model.predict(df_sample)[0]
 
-      st.success('No Diabetes')
+    if result == 1:
+        st.success('You have no diabetes!', icon="✅")
+    else:
+        st.error('You have diabetes', icon="🚨")
+    
 
-   else:
-      st.error('Has Diabetes')
+
+    
+
+
 
